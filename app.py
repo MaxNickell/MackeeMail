@@ -10,14 +10,22 @@ from sqlalchemy.sql import func
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Mackee'
 
-ENV = 'prod'
+ENV = 'dev'
 
 if ENV == 'dev':
     app.debug = True
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///database.db'
 else:
-    app.debug = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://tlojiytvalgaym:4b6b2a7fdd10d5e39b4cda3990aa54606c18865e08a69a6d2ea5356a28844c7a@ec2-3-229-161-70.compute-1.amazonaws.com:5432/d25k7dbmn4jtsl'
+    try:
+        import psycopg2
+        app.debug = False
+        # Replace actual credentials with placeholders
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@hostname:5432/database_name'
+    except ImportError:
+        print("Warning: PostgreSQL dependencies not available. Falling back to SQLite.")
+        app.debug = True
+        ENV = 'dev' 
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///database.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -196,5 +204,5 @@ def load_user(id):
 
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run(host='0.0.0.0', port=5001, threaded=True)
 
